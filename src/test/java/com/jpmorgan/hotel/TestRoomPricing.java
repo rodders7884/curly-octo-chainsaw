@@ -82,6 +82,8 @@ public class TestRoomPricing {
 	assertEquals(3d, price, 0.005);
 	price = rbs.quoteRoom("StandardRoom4", SWIMMINGPOOL, ENSUITE_BATHROOM, INTERNET, LATE_CHECKOUT);
 	assertEquals(15d, price, 0.005);
+
+	assertEquals("Quoted rooms should have been removed", 13, rbs.getAvailableRooms().size());
     }
 
     @Test
