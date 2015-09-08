@@ -1,10 +1,15 @@
 package com.jpmorgan.hotel;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import com.jpmorgan.hotel.exceptions.FacilityException;
+import com.jpmorgan.hotel.exceptions.UnavailableException;
+import com.jpmorgan.hotel.model.GreatViewRoom;
+import com.jpmorgan.hotel.model.StandardRoom;
+import com.jpmorgan.hotel.model.SuiteRoom;
 
 public class TestRoomPricing {
     // Write the test class first so you can prove the refactor does not change
@@ -12,6 +17,9 @@ public class TestRoomPricing {
 
     private static RoomBookingService rbs = new RoomBookingService();
 
+    // I've deliberately continued to use Strings to represent facilities on the main quoteRoom
+    // method
+    // Since I've assumed they come from a web front end or something
     private static final String ROOM_BREAKFAST = "ROOM_BREAKFAST";
     private static final String ENSUITE_BATHROOM = "ENSUITE_BATHROOM";
     private static final String INTERNET = "INTERNET";
@@ -38,7 +46,12 @@ public class TestRoomPricing {
     }
 
     @Test
-    public void testStandardPriceNoFacilities() {
+    public void testListRooms() {
+	assertEquals(15, rbs.getAvailableRooms().size());
+    }
+
+    @Test
+    public void testStandardPriceNoFacilities() throws FacilityException, UnavailableException {
 
 	double price = rbs.quoteRoom("StandardRoom1");
 	assertEquals(0d, price, 0.005);
@@ -46,7 +59,7 @@ public class TestRoomPricing {
     }
 
     @Test
-    public void testStandardPriceFacilities() {
+    public void testStandardPriceFacilities() throws FacilityException, UnavailableException {
 	double price = rbs.quoteRoom("StandardRoom1", ROOM_BREAKFAST);
 	assertEquals(3d, price, 0.005);
 	price = rbs.quoteRoom("StandardRoom2", ROOM_BREAKFAST, ENSUITE_BATHROOM);
@@ -57,10 +70,13 @@ public class TestRoomPricing {
 	assertEquals(15d, price, 0.005);
 	price = rbs.quoteRoom("StandardRoom5", ROOM_BREAKFAST, ENSUITE_BATHROOM, INTERNET, LATE_CHECKOUT, SWIMMINGPOOL);
 	assertEquals(21d, price, 0.005);
+
+	assertEquals("Quoted rooms should have been removed", 10, rbs.getAvailableRooms().size());
+
     }
 
     @Test
-    public void testStandardPriceFacilities2() {
+    public void testStandardPriceFacilities2() throws FacilityException, UnavailableException {
 	// Just to prove its not feature specific
 	double price = rbs.quoteRoom("StandardRoom1", SWIMMINGPOOL);
 	assertEquals(3d, price, 0.005);
@@ -69,14 +85,14 @@ public class TestRoomPricing {
     }
 
     @Test
-    public void testSuitePriceNoFacilities() {
+    public void testSuitePriceNoFacilities() throws FacilityException, UnavailableException {
 
 	double price = rbs.quoteRoom("SuiteRoom1");
 	assertEquals(0d, price, 0.005);
     }
 
     @Test
-    public void testSuitePriceFacilitiesIndividual() {
+    public void testSuitePriceFacilitiesIndividual() throws FacilityException, UnavailableException {
 	double price = rbs.quoteRoom("SuiteRoom1", ROOM_BREAKFAST);
 	assertEquals(5d, price, 0.005);
 	price = rbs.quoteRoom("SuiteRoom2", ENSUITE_BATHROOM);
@@ -90,7 +106,7 @@ public class TestRoomPricing {
     }
 
     @Test
-    public void testSuitePriceFacilitiesCombos() {
+    public void testSuitePriceFacilitiesCombos() throws FacilityException, UnavailableException {
 	double price = rbs.quoteRoom("SuiteRoom1", ROOM_BREAKFAST, LATE_CHECKOUT);
 	assertEquals(6d, price, 0.005);
 	price = rbs.quoteRoom("SuiteRoom2", ENSUITE_BATHROOM, ROOM_BREAKFAST);
@@ -101,7 +117,7 @@ public class TestRoomPricing {
     }
 
     @Test
-    public void testGreatViewPriceFacilitiesIndividual() {
+    public void testGreatViewPriceFacilitiesIndividual() throws FacilityException, UnavailableException {
 	double price = rbs.quoteRoom("GreatViewRoom1", ROOM_BREAKFAST);
 	assertEquals(10d, price, 0.005);
 	price = rbs.quoteRoom("GreatViewRoom2", ENSUITE_BATHROOM);
@@ -115,7 +131,7 @@ public class TestRoomPricing {
     }
 
     @Test
-    public void testGreatViewPriceFacilitiesCombos() {
+    public void testGreatViewPriceFacilitiesCombos() throws FacilityException, UnavailableException {
 	double price = rbs.quoteRoom("GreatViewRoom1", ROOM_BREAKFAST, LATE_CHECKOUT);
 	assertEquals(12d, price, 0.005);
 	price = rbs.quoteRoom("GreatViewRoom2", ENSUITE_BATHROOM, ROOM_BREAKFAST);
@@ -123,11 +139,6 @@ public class TestRoomPricing {
 	price = rbs.quoteRoom("GreatViewRoom3", INTERNET, SWIMMINGPOOL);
 	assertEquals(6d, price, 0.005);
 
-    }
-
-    @Test
-    public void testSomeFailureCases() {
-	fail("TODO");
     }
 
 }
